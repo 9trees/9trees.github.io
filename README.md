@@ -23,7 +23,7 @@ Initiative for Better Tomorrow(IBT) [Trees of India](https://en.wikipedia.org/wi
 9. Arjun tree/Marudha maram ([wiki](https://en.wikipedia.org/wiki/Terminalia_arjuna))
   Terminalia arjuna
 
-The first step is to bring motivation among young mind to plant trees around there living space, espesaly in fron of living space/sides of road. 
+The first step is to bring motivation among young mind to plant trees around there living space, espesaly in front of living space/sides of road. 
 
 
 # Images
