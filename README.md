@@ -20,7 +20,11 @@ Initiative for Better Tomorrow(IBT) [Trees of India](https://en.wikipedia.org/wi
   Cassia fistula
 8. Indian cork tree/Mara Malli ([wiki](https://en.wikipedia.org/wiki/Millingtonia))
    Millingtonia
-9. 
+9. Arjun tree/Marudha maram ([wiki](https://en.wikipedia.org/wiki/Terminalia_arjuna))
+  Terminalia arjuna
+
+The first step is to bring motivation among young mind to plant trees around there living space, espesaly in fron of living space/sides of road. 
+
 
 # Images
 1. Neam Tree ([wiki](https://en.wikipedia.org/wiki/Azadirachta_indica))
@@ -39,6 +43,8 @@ Initiative for Better Tomorrow(IBT) [Trees of India](https://en.wikipedia.org/wi
 ![](/images/9trees/7.PNG "Golden shower")
 8. Indian cork tree/Mara Malli ([wiki](https://en.wikipedia.org/wiki/Millingtonia))
 ![](/images/9trees/8.PNG "Indian cork tree")
+9. Arjun tree/Marudha maram ([wiki](https://en.wikipedia.org/wiki/Terminalia_arjuna))
+![](/images/9trees/9.png "Arjun tree")
 
 
 # Trees Around My Home
