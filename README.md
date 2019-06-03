@@ -21,16 +21,19 @@ Initiative for Better Tomorrow(IBT) [Trees of India](https://en.wikipedia.org/wi
 8. Indian cork tree/Mara Malli ([wiki](https://en.wikipedia.org/wiki/Millingtonia))
    Millingtonia
 9. 
+
 # Images
-![Neam Tree](/images/9trees/1.png)
-![Peepal Tree](/images/9trees/2.png)
-![Pacific rosewood](/images/9trees/3.png)
-![Indian fig tree](/images/9trees/4.png)
-![Pongam oil tree](/images/9trees/5.png)
-![Gulmohar Tree](/images/9trees/6.png)
-![Golden shower](/images/9trees/7.png)
-![Indian cork tree](/images/9trees/8.png)
-![Image](/images/9trees/1.png)
+
+![](/images/9trees/1.PNG "Neam Tree")
+![](/images/9trees/2.PNG "Peepal Tree")
+![](/images/9trees/3.PNG "Pacific rosewood")
+![](/images/9trees/4.PNG "Indian fig tree")
+![](/images/9trees/5.PNG "Pongam oil tree")
+![](/images/9trees/6.PNG "Gulmohar Tree")
+![](/images/9trees/7.PNG "Golden shower")
+![](/images/9trees/8.PNG "Indian cork tree")
+
+
 # Trees Around My Home
 1. Banyan Tree ([wiki](https://en.wikipedia.org/wiki/Banyan))
   Banyan
