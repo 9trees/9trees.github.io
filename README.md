@@ -8,8 +8,8 @@ Initiative for Better Tomorrow(IBT) [Trees of India](https://en.wikipedia.org/wi
   Azadirachta indica
 2. Peepal Tree ([wiki](https://en.wikipedia.org/wiki/Ficus_religiosa))
   Ficus religiosa
-3. Poo Arasamaram ([]())
-  ****heed help in finding this****
+3. Poo Arasamaram ([wiki](https://en.wikipedia.org/wiki/Thespesia_populnea))
+  Thespesia populnea
 4. Indian fig tree ([wiki](https://en.wikipedia.org/wiki/Ficus_racemosa))
   Ficus racemosa
 5. Pongam oiltree ([wiki](https://en.wikipedia.org/wiki/Millettia_pinnata))
