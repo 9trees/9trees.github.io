@@ -45,13 +45,13 @@
 		</script>
     	</script>
 		<div class="container">
-			<div class="header">
+			<!-- <div class="header">
 				<a href="http://tympanus.net/Development/ImageZoomTour/"><span>&laquo; Previous Demo: </span>Image Zoom Tour</a>
 				<span class="right_ab">
 					<a href="http://www.behance.net/AndrewLili" title="Behance Profile of Andrey Yakovlev & Lili Aleeva" target="_blank">Images by Andrey & Lili</a>
 					<a href="http://creativecommons.org/licenses/by-nc/3.0/" target="_blank" title="Images licensed under CC BY-NC 3.0">CC BY-NC 3.0</a>
 					<a href="http://tympanus.net/codrops/2011/08/30/automatic-image-montage/"><strong>back to the Codrops post</strong></a>
-				</span>
+				</span> -->
 			</div>
 			<div id="overlay" class="content">
 				<div class="inner">
@@ -96,24 +96,24 @@ alternateHeightRange : {
 				/* 
 				 * just for this demo:
 				 */
-				$('#showcode').toggle(
-					function() {
-						$(this).addClass('up').removeClass('down').next().slideDown();
-					},
-					function() {
-						$(this).addClass('down').removeClass('up').next().slideUp();
-					}
-				);
-				$('#panel').toggle(
-					function() {
-						$(this).addClass('show').removeClass('hide');
-						$('#overlay').stop().animate( { left : - $('#overlay').width() + 20 + 'px' }, 300 );
-					},
-					function() {
-						$(this).addClass('hide').removeClass('show');
-						$('#overlay').stop().animate( { left : '0px' }, 300 );
-					}
-				);
+				// $('#showcode').toggle(
+				// 	function() {
+				// 		$(this).addClass('up').removeClass('down').next().slideDown();
+				// 	},
+				// 	function() {
+				// 		$(this).addClass('down').removeClass('up').next().slideUp();
+				// 	}
+				// );
+				// $('#panel').toggle(
+				// 	function() {
+				// 		$(this).addClass('show').removeClass('hide');
+				// 		$('#overlay').stop().animate( { left : - $('#overlay').width() + 20 + 'px' }, 300 );
+				// 	},
+				// 	function() {
+				// 		$(this).addClass('hide').removeClass('show');
+				// 		$('#overlay').stop().animate( { left : '0px' }, 300 );
+				// 	}
+				// );
 				
 				var $container 	= $('#am-container'),
 					$imgs		= $container.find('img').hide(),
