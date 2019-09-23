@@ -55,84 +55,40 @@ fixedHeight : 60
 				</div>
 			</div>
 			<div class="am-container" id="am-container" style="width:700px;float:right;">
-				<a href="#"><img src="images/1.jpg"></img></a>
-				<a href="#"><img src="images/2.jpg"></img></a>
-				<a href="#"><img src="images/3.jpg"></img></a>
-				<a href="#"><img src="images/4.jpg"></img></a>
-				<a href="#"><img src="images/5.jpg"></img></a>
-				<a href="#"><img src="images/6.jpg"></img></a>
-				<a href="#"><img src="images/7.jpg"></img></a>
-				<a href="#"><img src="images/8.jpg"></img></a>
-				<a href="#"><img src="images/9.jpg"></img></a>
-				<a href="#"><img src="images/10.jpg"></img></a>
-				<a href="#"><img src="images/11.jpg"></img></a>
-				<a href="#"><img src="images/12.jpg"></img></a>
-				<a href="#"><img src="images/13.jpg"></img></a>
-				<a href="#"><img src="images/14.jpg"></img></a>
-				<a href="#"><img src="images/15.jpg"></img></a>
-				<a href="#"><img src="images/16.jpg"></img></a>
-				<a href="#"><img src="images/17.jpg"></img></a>
-				<a href="#"><img src="images/18.jpg"></img></a>
-				<a href="#"><img src="images/19.jpg"></img></a>
-				<a href="#"><img src="images/20.jpg"></img></a>
-				<a href="#"><img src="images/21.jpg"></img></a>
-				<a href="#"><img src="images/22.jpg"></img></a>
-				<a href="#"><img src="images/23.jpg"></img></a>
-				<a href="#"><img src="images/24.jpg"></img></a>
-				<a href="#"><img src="images/25.jpg"></img></a>
-				<a href="#"><img src="images/26.jpg"></img></a>
-				<a href="#"><img src="images/27.jpg"></img></a>
-				<a href="#"><img src="images/28.jpg"></img></a>
-				<a href="#"><img src="images/29.jpg"></img></a>
-				<a href="#"><img src="images/30.jpg"></img></a>
-				<a href="#"><img src="images/31.jpg"></img></a>
-				<a href="#"><img src="images/32.jpg"></img></a>
-				<a href="#"><img src="images/33.jpg"></img></a>
-				<a href="#"><img src="images/34.jpg"></img></a>
-				<a href="#"><img src="images/35.jpg"></img></a>
-				<a href="#"><img src="images/36.jpg"></img></a>
-				<a href="#"><img src="images/37.jpg"></img></a>
-				<a href="#"><img src="images/38.jpg"></img></a>
-				<a href="#"><img src="images/39.jpg"></img></a>
-				<a href="#"><img src="images/40.jpg"></img></a>
-				<a href="#"><img src="images/41.jpg"></img></a>
-				<a href="#"><img src="images/42.jpg"></img></a>
-				<a href="#"><img src="images/43.jpg"></img></a>
-				<a href="#"><img src="images/44.jpg"></img></a>
-				<a href="#"><img src="images/45.jpg"></img></a>
-				<a href="#"><img src="images/46.jpg"></img></a>
-				<a href="#"><img src="images/47.jpg"></img></a>
-				<a href="#"><img src="images/48.jpg"></img></a>
-				<a href="#"><img src="images/49.jpg"></img></a>
-				<a href="#"><img src="images/50.jpg"></img></a>
-				<a href="#"><img src="images/51.jpg"></img></a>
-				<a href="#"><img src="images/52.jpg"></img></a>
-				<a href="#"><img src="images/53.jpg"></img></a>
-				<a href="#"><img src="images/54.jpg"></img></a>
-				<a href="#"><img src="images/55.jpg"></img></a>
-				<a href="#"><img src="images/56.jpg"></img></a>
-				<a href="#"><img src="images/57.jpg"></img></a>
-				<a href="#"><img src="images/58.jpg"></img></a>
-				<a href="#"><img src="images/59.jpg"></img></a>
-				<a href="#"><img src="images/60.jpg"></img></a>
-				<a href="#"><img src="images/61.jpg"></img></a>
-				<a href="#"><img src="images/62.jpg"></img></a>
-				<a href="#"><img src="images/63.jpg"></img></a>
-				<a href="#"><img src="images/64.jpg"></img></a>
-				<a href="#"><img src="images/65.jpg"></img></a>
-				<a href="#"><img src="images/66.jpg"></img></a>
-				<a href="#"><img src="images/67.jpg"></img></a>
-				<a href="#"><img src="images/68.jpg"></img></a>
-				<a href="#"><img src="images/69.jpg"></img></a>
-				<a href="#"><img src="images/70.jpg"></img></a>
-				<a href="#"><img src="images/71.jpg"></img></a>
-				<a href="#"><img src="images/72.jpg"></img></a>
-				<a href="#"><img src="images/73.jpg"></img></a>
+				
 			</div>
 			<div id="loadmore" class="loadmore">load more...</div>
 		</div>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 		<script type="text/javascript" src="js/jquery.montage.min.js"></script>
+		<script type="text/javascript">
+    		function readTextFile(file, callback) {
+			var rawFile = new XMLHttpRequest();
+			rawFile.overrideMimeType("application/json");
+			rawFile.open("GET", file, true);
+			rawFile.onreadystatechange = function() {
+				if (rawFile.readyState === 4 && rawFile.status == "200") {
+					callback(rawFile.responseText);
+				}
+			}
+			rawFile.send(null);
+		}
+			//usage:
+			readTextFile("img.json", function(text){
+				var data = JSON.parse(text);
+				var container = document.getElementById("am-container");
+
+				for( i=0; i<data.fpath.length; i++){
+					var urls = data.fpath[i];
+					//console.log(urls.path);
+				  container.insertAdjacentHTML('beforeend', '<a href="'+urls.path+'"><img src="'+urls.path+'"></img></a>');
+				}
+				
+			});
+			//<a href="#"><img src="images/1.jpg"></img></a>
+			
+			
+		</script>
 		<script type="text/javascript">
 			$(function() {
 				/* 

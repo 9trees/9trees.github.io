@@ -43,7 +43,7 @@
 			
 			
 		</script>
-    	</script>
+    	
 		<div class="container">
 			<!-- <div class="header">
 				<a href="http://tympanus.net/Development/ImageZoomTour/"><span>&laquo; Previous Demo: </span>Image Zoom Tour</a>
@@ -96,24 +96,24 @@ alternateHeightRange : {
 				/* 
 				 * just for this demo:
 				 */
-				// $('#showcode').toggle(
-				// 	function() {
-				// 		$(this).addClass('up').removeClass('down').next().slideDown();
-				// 	},
-				// 	function() {
-				// 		$(this).addClass('down').removeClass('up').next().slideUp();
-				// 	}
-				// );
-				// $('#panel').toggle(
-				// 	function() {
-				// 		$(this).addClass('show').removeClass('hide');
-				// 		$('#overlay').stop().animate( { left : - $('#overlay').width() + 20 + 'px' }, 300 );
-				// 	},
-				// 	function() {
-				// 		$(this).addClass('hide').removeClass('show');
-				// 		$('#overlay').stop().animate( { left : '0px' }, 300 );
-				// 	}
-				// );
+				$('#showcode').toggle(
+					function() {
+						$(this).addClass('up').removeClass('down').next().slideDown();
+					},
+					function() {
+						$(this).addClass('down').removeClass('up').next().slideUp();
+					}
+				);
+				$('#panel').toggle(
+					function() {
+						$(this).addClass('show').removeClass('hide');
+						$('#overlay').stop().animate( { left : - $('#overlay').width() + 20 + 'px' }, 300 );
+					},
+					function() {
+						$(this).addClass('hide').removeClass('show');
+						$('#overlay').stop().animate( { left : '0px' }, 300 );
+					}
+				);
 				
 				var $container 	= $('#am-container'),
 					$imgs		= $container.find('img').hide(),
@@ -132,7 +132,8 @@ alternateHeightRange : {
 								alternateHeightRange	: {
 									min	: 90,
 									max	: 240
-								}
+								},
+								margin : 0
 							});
 							
 							/* 
