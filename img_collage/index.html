@@ -15,37 +15,7 @@
 		<link href='https://fonts.googleapis.com/css?family=Monoton' rel='stylesheet' type='text/css' />
     </head>
     <body>
-    	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-		<script type="text/javascript" src="js/jquery.montage.min.js"></script>
-    	<script type="text/javascript">
-    		function readTextFile(file, callback) {
-			var rawFile = new XMLHttpRequest();
-			rawFile.overrideMimeType("application/json");
-			rawFile.open("GET", file, true);
-			rawFile.onreadystatechange = function() {
-				if (rawFile.readyState === 4 && rawFile.status == "200") {
-					callback(rawFile.responseText);
-				}
-			}
-			rawFile.send(null);
-		}
-			//usage:
-			readTextFile("img.json", function(text){
-				var data = JSON.parse(text);
-				var container = document.getElementById("am-container");
-
-				for( i=0; i<data.fpath.length; i++){
-					var urls = data.fpath[i];
-					//console.log(urls.path);
-				  container.insertAdjacentHTML('beforeend', '<a href="'+urls.path+'"><img src="'+urls.path+'"></img></a>');
-				}
-				
-			});
-			//<a href="#"><img src="images/1.jpg"></img></a>
-			
-			
-		</script>
-    	
+    	    	
 		<div class="container">
 			<!-- <div class="header">
 				<a href="http://tympanus.net/Development/ImageZoomTour/"><span>&laquo; Previous Demo: </span>Image Zoom Tour</a>
@@ -88,10 +58,104 @@ alternateHeightRange : {
 				</div>
 			</div>
 			<div class="am-container" id="am-container">
-				
+				<a href="./SImg/63.jpeg"><img src="./SImg/63.jpeg"></img></a>
+				<a href="./SImg/11.jpeg"><img src="./SImg/11.jpeg"></img></a>
+				<a href="./SImg/61.jpeg"><img src="./SImg/61.jpeg"></img></a>
+				<a href="./SImg/33.jpeg"><img src="./SImg/33.jpeg"></img></a>
+				<a href="./SImg/79.jpeg"><img src="./SImg/79.jpeg"></img></a>
+				<a href="./SImg/69.jpeg"><img src="./SImg/69.jpeg"></img></a>
+				<a href="./SImg/85.jpeg"><img src="./SImg/85.jpeg"></img></a>
+				<a href="./SImg/73.jpeg"><img src="./SImg/73.jpeg"></img></a>
+				<a href="./SImg/90.jpeg"><img src="./SImg/90.jpeg"></img></a>
+				<a href="./SImg/4.jpeg"><img src="./SImg/4.jpeg"></img></a>
+				<a href="./SImg/23.jpeg"><img src="./SImg/23.jpeg"></img></a>
+				<a href="./SImg/42.jpeg"><img src="./SImg/42.jpeg"></img></a>
+				<a href="./SImg/72.jpeg"><img src="./SImg/72.jpeg"></img></a>
+				<a href="./SImg/29.jpeg"><img src="./SImg/29.jpeg"></img></a>
+				<a href="./SImg/22.jpeg"><img src="./SImg/22.jpeg"></img></a>
+				<a href="./SImg/46.jpeg"><img src="./SImg/46.jpeg"></img></a>
+				<a href="./SImg/58.jpeg"><img src="./SImg/58.jpeg"></img></a>
+				<a href="./SImg/77.jpeg"><img src="./SImg/77.jpeg"></img></a>
+				<a href="./SImg/76.jpeg"><img src="./SImg/76.jpeg"></img></a>
+				<a href="./SImg/32.jpeg"><img src="./SImg/32.jpeg"></img></a>
+				<a href="./SImg/3.jpeg"><img src="./SImg/3.jpeg"></img></a>
+				<a href="./SImg/8.jpeg"><img src="./SImg/8.jpeg"></img></a>
+				<a href="./SImg/5.jpeg"><img src="./SImg/5.jpeg"></img></a>
+				<a href="./SImg/14.jpeg"><img src="./SImg/14.jpeg"></img></a>
+				<a href="./SImg/65.jpeg"><img src="./SImg/65.jpeg"></img></a>
+				<a href="./SImg/28.jpeg"><img src="./SImg/28.jpeg"></img></a>
+				<a href="./SImg/21.jpeg"><img src="./SImg/21.jpeg"></img></a>
+				<a href="./SImg/17.jpeg"><img src="./SImg/17.jpeg"></img></a>
+				<a href="./SImg/86.jpeg"><img src="./SImg/86.jpeg"></img></a>
+				<a href="./SImg/47.jpeg"><img src="./SImg/47.jpeg"></img></a>
+				<a href="./SImg/9.jpeg"><img src="./SImg/9.jpeg"></img></a>
+				<a href="./SImg/35.jpeg"><img src="./SImg/35.jpeg"></img></a>
+				<a href="./SImg/83.jpeg"><img src="./SImg/83.jpeg"></img></a>
+				<a href="./SImg/26.jpeg"><img src="./SImg/26.jpeg"></img></a>
+				<a href="./SImg/20.jpeg"><img src="./SImg/20.jpeg"></img></a>
+				<a href="./SImg/1.jpeg"><img src="./SImg/1.jpeg"></img></a>
+				<a href="./SImg/38.jpeg"><img src="./SImg/38.jpeg"></img></a>
+				<a href="./SImg/56.jpeg"><img src="./SImg/56.jpeg"></img></a>
+				<a href="./SImg/89.jpeg"><img src="./SImg/89.jpeg"></img></a>
+				<a href="./SImg/59.jpeg"><img src="./SImg/59.jpeg"></img></a>
+				<a href="./SImg/0.jpeg"><img src="./SImg/0.jpeg"></img></a>
+				<a href="./SImg/68.jpeg"><img src="./SImg/68.jpeg"></img></a>
+				<a href="./SImg/36.jpeg"><img src="./SImg/36.jpeg"></img></a>
+				<a href="./SImg/16.jpeg"><img src="./SImg/16.jpeg"></img></a>
+				<a href="./SImg/66.jpeg"><img src="./SImg/66.jpeg"></img></a>
+				<a href="./SImg/6.jpeg"><img src="./SImg/6.jpeg"></img></a>
+				<a href="./SImg/52.jpeg"><img src="./SImg/52.jpeg"></img></a>
+				<a href="./SImg/45.jpeg"><img src="./SImg/45.jpeg"></img></a>
+				<a href="./SImg/91.jpeg"><img src="./SImg/91.jpeg"></img></a>
+				<a href="./SImg/53.jpeg"><img src="./SImg/53.jpeg"></img></a>
+				<a href="./SImg/13.jpeg"><img src="./SImg/13.jpeg"></img></a>
+				<a href="./SImg/31.jpeg"><img src="./SImg/31.jpeg"></img></a>
+				<a href="./SImg/37.jpeg"><img src="./SImg/37.jpeg"></img></a>
+				<a href="./SImg/39.jpeg"><img src="./SImg/39.jpeg"></img></a>
+				<a href="./SImg/82.jpeg"><img src="./SImg/82.jpeg"></img></a>
+				<a href="./SImg/15.jpeg"><img src="./SImg/15.jpeg"></img></a>
+				<a href="./SImg/87.jpeg"><img src="./SImg/87.jpeg"></img></a>
+				<a href="./SImg/48.jpeg"><img src="./SImg/48.jpeg"></img></a>
+				<a href="./SImg/88.jpeg"><img src="./SImg/88.jpeg"></img></a>
+				<a href="./SImg/64.jpeg"><img src="./SImg/64.jpeg"></img></a>
+				<a href="./SImg/41.jpeg"><img src="./SImg/41.jpeg"></img></a>
+				<a href="./SImg/2.jpeg"><img src="./SImg/2.jpeg"></img></a>
+				<a href="./SImg/74.jpeg"><img src="./SImg/74.jpeg"></img></a>
+				<a href="./SImg/84.jpeg"><img src="./SImg/84.jpeg"></img></a>
+				<a href="./SImg/19.jpeg"><img src="./SImg/19.jpeg"></img></a>
+				<a href="./SImg/71.jpeg"><img src="./SImg/71.jpeg"></img></a>
+				<a href="./SImg/75.jpeg"><img src="./SImg/75.jpeg"></img></a>
+				<a href="./SImg/7.jpeg"><img src="./SImg/7.jpeg"></img></a>
+				<a href="./SImg/70.jpeg"><img src="./SImg/70.jpeg"></img></a>
+				<a href="./SImg/60.jpeg"><img src="./SImg/60.jpeg"></img></a>
+				<a href="./SImg/80.jpeg"><img src="./SImg/80.jpeg"></img></a>
+				<a href="./SImg/27.jpeg"><img src="./SImg/27.jpeg"></img></a>
+				<a href="./SImg/24.jpeg"><img src="./SImg/24.jpeg"></img></a>
+				<a href="./SImg/34.jpeg"><img src="./SImg/34.jpeg"></img></a>
+				<a href="./SImg/81.jpeg"><img src="./SImg/81.jpeg"></img></a>
+				<a href="./SImg/25.jpeg"><img src="./SImg/25.jpeg"></img></a>
+				<a href="./SImg/57.jpeg"><img src="./SImg/57.jpeg"></img></a>
+				<a href="./SImg/30.jpeg"><img src="./SImg/30.jpeg"></img></a>
+				<a href="./SImg/50.jpeg"><img src="./SImg/50.jpeg"></img></a>
+				<a href="./SImg/55.jpeg"><img src="./SImg/55.jpeg"></img></a>
+				<a href="./SImg/43.jpeg"><img src="./SImg/43.jpeg"></img></a>
+				<a href="./SImg/62.jpeg"><img src="./SImg/62.jpeg"></img></a>
+				<a href="./SImg/51.jpeg"><img src="./SImg/51.jpeg"></img></a>
+				<a href="./SImg/44.jpeg"><img src="./SImg/44.jpeg"></img></a>
+				<a href="./SImg/67.jpeg"><img src="./SImg/67.jpeg"></img></a>
+				<a href="./SImg/10.jpeg"><img src="./SImg/10.jpeg"></img></a>
+				<a href="./SImg/78.jpeg"><img src="./SImg/78.jpeg"></img></a>
+				<a href="./SImg/54.jpeg"><img src="./SImg/54.jpeg"></img></a>
+				<a href="./SImg/49.jpeg"><img src="./SImg/49.jpeg"></img></a>
+				<a href="./SImg/12.jpeg"><img src="./SImg/12.jpeg"></img></a>
+				<a href="./SImg/18.jpeg"><img src="./SImg/18.jpeg"></img></a>
+				<a href="./SImg/40.jpeg"><img src="./SImg/40.jpeg"></img></a>
+
 			</div>
 		</div>
-		<script type="text/javascript">
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery.montage.min.js"></script>
+    	<script type="text/javascript">
 			$(function() {
 				/* 
 				 * just for this demo:
@@ -119,7 +183,7 @@ alternateHeightRange : {
 					$imgs		= $container.find('img').hide(),
 					totalImgs	= $imgs.length,
 					cnt			= 0;
-				
+				console.log(totalImgs);
 				$imgs.each(function(i) {
 					var $img	= $(this);
 					$('<img/>').load(function() {
