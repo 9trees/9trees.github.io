@@ -49,4 +49,6 @@ The first step is to bring motivation among young mind to plant trees around the
 
 # Trees Around My Home
 1. Banyan Tree ([wiki](https://en.wikipedia.org/wiki/Banyan))
-  Banyan
+2. Arjun tree/Marudha maram ([wiki](https://en.wikipedia.org/wiki/Terminalia_arjuna))
+3. Pterocarpus marsupium/Vengai maram ([wiki](https://en.wikipedia.org/wiki/Pterocarpus_marsupium))
+4. Swietenia macrophylla/Mahogany maram ([wiki](https://en.wikipedia.org/wiki/Swietenia_macrophylla))
