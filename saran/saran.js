@@ -24,8 +24,14 @@ var item = '{"vidList":[' +
 '{"title":"Saran","file":"WhatsApp Video 2020-05-10 at 6.07.16 PM.mp4" },' +
 '{"title":"Saran","file":"WhatsApp Video 2020-05-10 at 6.08.05 PM.mp4" },' +
 '{"title":"Saran","file":"WhatsApp Video 2020-05-13 at 6.23.57 PM.mp4" },' +
+'{"title":"Saran","file":"WhatsApp Video 2020-05-15 at 7.07.12 PM.mp4" },' +
+'{"title":"Saran","file":"WhatsApp Video 2020-05-20 at 9.22.19 AM.mp4" },' +
+'{"title":"Saran","file":"WhatsApp Video 2020-05-21 at 6.31.01 PM.mp4" },' +
+'{"title":"Saran","file":"WhatsApp Video 2020-04-01 at 1.55.29 PM.mp4" },' +
 '{"title":"Saran","file":"WhatsApp Video 2020-05-13 at 6.37.18 PM.mp4" }' +
 ']}';
+
+
 
 obj = JSON.parse(item);
 var count = Object.keys(obj.vidList).length;
@@ -48,7 +54,17 @@ function preVideo() {
 function addsrc(objid){
 	document.getElementById("cvid").src = obj.vidList[objid].file;
 }
-
+function vdcoll(){
+	var abc = '<video id="cvid" src="';
+	//var abc1 = 'WhatsApp Video 2020-05-01 at 6.07.23 PM.mp4';
+	var abc2 = '" type="video/mp4" controls></video>';
+	for (i =0; i < count; i++){
+	//console.log(abc3);
+		abc1 = obj.vidList[i].file;
+		var abc3 = abc + abc1 + abc2;
+		document.getElementById("vdtag").innerHTML += abc3;
+	}
+}
 
 
 
