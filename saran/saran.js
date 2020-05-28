@@ -28,7 +28,11 @@ var item = '{"vidList":[' +
 '{"title":"Saran","file":"WhatsApp Video 2020-05-20 at 9.22.19 AM.mp4" },' +
 '{"title":"Saran","file":"WhatsApp Video 2020-05-21 at 6.31.01 PM.mp4" },' +
 '{"title":"Saran","file":"WhatsApp Video 2020-04-01 at 1.55.29 PM.mp4" },' +
-'{"title":"Saran","file":"WhatsApp Video 2020-05-13 at 6.37.18 PM.mp4" }' +
+'{"title":"Saran","file":"WhatsApp Video 2020-05-13 at 6.37.18 PM.mp4" },' +
+'{"title":"Saran","file":"WhatsApp Video 2020-05-26 at 11.50.44 AM.mp4" },' +
+'{"title":"Saran","file":"WhatsApp Video 2020-05-26 at 11.50.55 AM.mp4" },' +
+'{"title":"Saran","file":"WhatsApp Video 2020-05-26 at 11.51.07 AM.mp4" },' +
+'{"title":"Saran","file":"WhatsApp Video 2020-05-27 at 6.19.46 PM.mp4" }' +
 ']}';
 
 
@@ -38,21 +42,23 @@ var count = Object.keys(obj.vidList).length;
 //console.log(count);
 vidIndx = 0;
 function nxtVideo() {
-	if (vidIndx > count-2) {
+	if (vidIndx >= count-1) {
 		vidIndx = 0; 
 	}
 	else {vidIndx += 1;}
 	addsrc(vidIndx);	
 }
 function preVideo() {
-	if (vidIndx < 0) {
-		vidIndx = count-2; 
+	if (vidIndx <= 0) {
+		vidIndx = count-1; 
 	}
 	else {vidIndx -= 1;}
 	addsrc(vidIndx);
 }
 function addsrc(objid){
+	console.log(objid)
 	document.getElementById("cvid").src = obj.vidList[objid].file;
+	document.getElementById("ttl").innerHTML = (objid+1).toString() + "_of_" + count.toString();
 }
 function vdcoll(){
 	var abc = '<video id="cvid" src="';
@@ -65,7 +71,3 @@ function vdcoll(){
 		document.getElementById("vdtag").innerHTML += abc3;
 	}
 }
-
-
-
-	
