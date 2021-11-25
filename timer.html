@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
+    <title>Rev!</title>
+    
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+
+        body {
+          background-image: linear-gradient(45deg, #85FFBD 0%, #FFFB7D 100%);
+        }
+
+        .enable-debug #timer-second .banner-countdown__digit {
+          border: 1px solid red;
+          overflow: unset;
+        }
+
+        .enable-debug #timer-second .banner-countdown__digit > span {
+          border: 1px solid red;
+          overflow: unset;
+        }
+
+        .banner-countdown {
+          font-family: 'Open Sans', sans-serif;
+          display: grid;
+          grid-template-columns: 1fr;
+          align-items: center;
+          align-content: center;
+          max-width: 1440px;
+          margin: 56px auto;
+        }
+
+        @media only screen and (max-width: 768px) {
+          .banner-countdown {
+            grid-template-columns: 1fr;
+            justify-content: center;
+            text-align: center;
+          }
+
+          .banner-countdown .banner-countdown__timer {
+            justify-content: center;
+            padding: 20px;
+            min-width: 320px;
+          }
+        }
+
+        .banner-countdown__timer {
+          background: #033b42;
+          padding: 180px 70px;
+          display: flex;
+          color: white;
+          justify-content: center;
+          column-gap: 64px;
+        box-shadow: 0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12), 0 11px 15px -7px rgba(0,0,0,0.20);
+            border-radius: 36px;border-left: 32px solid #fff6f6;
+            border-right: 32px solid #fff6f6;
+        }
+
+        .banner-countdown__item {
+          display: grid;
+          grid-template-columns: 1fr;
+          justify-items: center;
+        }
+
+        .banner-countdown__digits {
+          font-size: 10rem;
+          font-weight: 800;
+          line-height: 1;
+          height: 10rem;
+        }
+
+        .banner-countdown__digit {
+          width: 6rem;
+          display: inline-block;
+          overflow: hidden;
+          height: 10rem;
+        }
+
+        .banner-countdown__digit-num {
+          display: flex;
+          flex-direction: column;
+          transform: translateX(0);
+          transition: transform 0.4s cubic-bezier(.15,-0.12,.32,.91);
+        }
+
+        .banner-countdown__digit-num span {
+          line-height: 1;
+        }
+
+        .banner-countdown__label {
+          font-size: 3rem;
+        }
+
+        .banner-countdown__text {
+          padding: 20px;
+        }
+
+        .banner-countdown__text a {
+          text-decoration: none;
+          color: black;
+        }
+
+        .banner-countdown__text a:hover {
+          text-decoration: underline;
+        }
+
+        .banner-countdown__digit-hundred {
+          display: none;
+        }
+
+        #timer-day .banner-countdown__digit-hundred {
+          display: none;
+        }
+
+        #timer-day .banner-countdown__digit-first {
+          display: none;
+        }
+    </style>
+    
+  </head>
+  <body>
+    <h1>Hello, world!</h1>
+    <div class="banner-countdown enable-debug">
+  <div class="banner-countdown__timer">
+      <div id="timer-day" class="banner-countdown__item">
+        <div class="banner-countdown__digits">
+          <div class="banner-countdown__digit banner-countdown__digit-hundred">0</div><div class="banner-countdown__digit banner-countdown__digit-first">0</div><div class="banner-countdown__digit banner-countdown__digit-second">0</div>
+        </div>
+        <div class="banner-countdown__label">Days</div>
+      </div>
+      <div id="timer-hour" class="banner-countdown__item">
+        <div class="banner-countdown__digits">
+          <div class="banner-countdown__digit banner-countdown__digit-first">0</div><div class="banner-countdown__digit banner-countdown__digit-second">0</div>
+        </div>
+        <div class="banner-countdown__label">Hours</div>
+      </div>
+      <div id="timer-minute" class="banner-countdown__item">
+        <div class="banner-countdown__digits">
+          <div class="banner-countdown__digit banner-countdown__digit-first">0</div><div class="banner-countdown__digit banner-countdown__digit-second">0</div>
+        </div>
+        <div class="banner-countdown__label">Minutes</div>
+      </div>
+      <div id="timer-second" class="banner-countdown__item">
+        <div class="banner-countdown__digits">
+          <div class="banner-countdown__digit banner-countdown__digit-first">0</div><div class="banner-countdown__digit banner-countdown__digit-second">0</div>
+        </div>
+        <div class="banner-countdown__label">Seconds</div>
+      </div>
+    </div>
+ </div>
+
+    <!-- Optional JavaScript -->
+    <script>
+      const dateEndString = ("November 25, 2021 15:59:59 GMT+0")
+
+      const digitElement = document.querySelectorAll(".banner-countdown__digit");
+
+      // Adding of span element to the each digit
+      digitElement.forEach((el) => {
+        const digitWrapper = document.createElement("span");
+        digitWrapper.classList.add("banner-countdown__digit-num");
+        for (let x = 0; x <= 9; x++) {
+          const digitItem = document.createElement("span");
+          digitItem.innerText = x + "";
+          digitWrapper.appendChild(digitItem);
+        }
+        el.innerHTML = "";
+        el.appendChild(digitWrapper);
+      });
+
+      // main function to run the countdown
+      // endTime - Date with time
+      function makeCountdown(endTime, hideDaysIfEmpty = false) {
+        let endTimeParse = Date.parse(endTime) / 1000;
+        let now = new Date();
+        let nowParse = Date.parse(now) / 1000;
+        let timeLeft = endTimeParse - nowParse;
+        let days = Math.floor(timeLeft / 86400);
+        let hours = Math.floor((timeLeft - days * 86400) / 3600);
+        let minutes = Math.floor((timeLeft - days * 86400 - hours * 3600) / 60);
+        let seconds = Math.floor(
+          timeLeft - days * 86400 - hours * 3600 - minutes * 60
+        );
+        if (timeLeft < 0) {
+          days = 0;
+          hours = 0;
+          seconds = 0;
+          minutes = 0;
+        }
+        if (hours < "10") {
+          hours = "0" + hours;
+        }
+        if (minutes < "10") {
+          minutes = "0" + minutes;
+        }
+        if (seconds < "10") {
+          seconds = "0" + seconds;
+        }
+        if(days <= 0 && hideDaysIfEmpty) {
+          const dayElement = document.querySelector(`.banner-countdown #timer-day`);
+          if (dayElement) {
+            dayElement.style.display = "none";
+          }
+        }else {
+          updateCountdown(days, "timer-day");
+        }
+        updateCountdown(hours, "timer-hour");
+        updateCountdown(minutes, "timer-minute");
+        updateCountdown(seconds, "timer-second");
+      }
+
+      // updating the display
+      function updateCountdown(value, elementId) {
+        const element = document.querySelector(`.banner-countdown #${elementId}`);
+        const firstDigitElement = element.querySelector(
+          `.banner-countdown__digit-first > span`
+        );
+        const secondDigitElement = element.querySelector(
+          `.banner-countdown__digit-second > span`
+        );
+
+        if (elementId === "timer-day") {
+          const elementSecond = element.querySelector(
+            `.banner-countdown__digit-first`
+          );
+          const elementHundred = element.querySelector(
+            `.banner-countdown__digit-hundred`
+          );
+          if (value < 10) {
+            value = "0" + value;
+          }
+          if (value >= 10) {
+            if (elementSecond) {
+              elementSecond.style.display = "inline-block";
+            }
+          }
+          if (value >= 100) {
+            if (elementHundred) {
+              elementHundred.style.display = "inline-block";
+            }
+          }
+        }
+
+        const digitHeight = secondDigitElement.offsetHeight / 10;
+        let [firstDigit, secondDigit, hundredDigit] = [0, 0];
+        if (elementId === "timer-day") {
+          if (parseInt(value) >= 100) {
+            [hundredDigit, firstDigit, secondDigit] = value
+              .toString()
+              .split("")
+              .map(Number);
+            const hundredDigitElement = element.querySelector(
+              `.banner-countdown__digit-hundred > span`
+            );
+            hundredDigitElement.style.transform =
+              "translateY(-" + hundredDigit * digitHeight + "px)";
+          } else {
+            [firstDigit, secondDigit] = value.toString().split("").map(Number);
+          }
+        } else {
+          [firstDigit, secondDigit] = value.toString().split("").map(Number);
+        }
+
+        firstDigitElement.style.transform =
+          "translateY(-" + firstDigit * digitHeight + "px)";
+        secondDigitElement.style.transform =
+          "translateY(-" + secondDigit * digitHeight + "px)";
+      }
+
+      let countdownInterval = setInterval(function () {
+        // Pass the date here
+        makeCountdown(new Date(dateEndString), false);
+      }, 100);
+    </script>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </body>
+</html>
