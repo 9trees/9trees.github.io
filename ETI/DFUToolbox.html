@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <style type="text/css">
+        .bg-black {
+            background-color: #111 !important;
+              color: #eee;
+          }
+    </style>
+    <title>ETI DFUToolbox5.0</title>
+</head>
+<body>
+    <div class="container">
+        <div>
+            <p class="fs-1">ETI DFU Toolbox 5.0 <a href ="#" class="fs-6">Developed by Research and Development</a></p>            
+        </div><hr>
+        <div class="float-right">
+            <label class="form-label fs-4" for="bootFile">*Select Bootloader TI-TXT File:</label>
+            <input type="file" required = "true" class="form-control" id="bootFile" />
+            <small id="bootFileHelp" class="form-text text-muted">Help txt with path and other hints.</small>
+            <br><br>
+            <label class="form-label fs-4" for="appFile">*Select App_Block TI-TXT File:</label>
+            <input type="file" required = "true" class="form-control" id="appFile" />
+            <small id="bootFileHelp" class="form-text text-muted">Help txt with path and other hints.</small>
+            <br><br>
+        </div>
+        <!--Add to button to save the data.-->    
+        <div>
+            <p>Note: Please do not leave the above field empty.</p>
+            <input type="button" id="bt" class="btn btn-primary" value="Download Master File" onclick="readBootFile()" />
+            <p id="msg" class="text-success"></p>
+        </div>
+                  
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+</body>
+<script>
+    var master_dfu_data = '@4000\r\n00 00\r\n';
+    var bootSAdd = [];
+    var bootSData = [];
+    var appSAdd = [];
+    var appSData = [];
+    function readBootFile()
+    {
+        var data = [];
+        var address_index = 0;
+        var bot_path = document.getElementById("bootFile").files[0];
+        var reader = new FileReader();
+        reader.onload = function(progressEvent){
+            // Entire file
+            // console.log(this.result);
+
+            // By lines
+            var lines = this.result.split('\r\n');
+            for(var line = 0; line < lines.length; line++)
+            {
+                // console.log(lines[line]);
+                var line_data = lines[line].split(' ');                
+                if(line_data[0][0] == '@')
+                {                       
+                    master_dfu_data = master_dfu_data.concat(lines[line], '\r\n');
+                    // console.log(master_dfu_data);
+                }
+                else if(line_data[0][0] == 'q')
+                {
+                    break;
+                }
+                else
+                {                       
+                    master_dfu_data = master_dfu_data.concat(lines[line], '\r\n');
+                    // console.log(master_dfu_data);                    
+                }
+            }bootSData.push(data);
+            readAppFile();                  
+        };
+        reader.readAsText(bot_path); 
+    }
+
+    function readAppFile()
+    {
+        var data = [];
+        var address_index = 0;
+        var app_path = document.getElementById("appFile").files[0];
+        var reader = new FileReader();
+        reader.onload = function(progressEvent){
+            // Entire file
+            // console.log(this.result);
+
+            // By lines
+            var lines = this.result.split('\r\n');
+            for(var line = 0; line < lines.length; line++)
+            {
+                // console.log(lines[line]);
+                var line_data = lines[line].split(' ');                
+                if(line_data[0][0] == '@')
+                {                       
+                    if(lines[line] == '@FFFE')lines[line] = '@23FFE';
+                    master_dfu_data = master_dfu_data.concat(lines[line], '\r\n');
+                    // console.log(master_dfu_data);
+                }
+                else if(line_data[0][0] == 'q')
+                {
+                    break;
+                }
+                else
+                {                       
+                    master_dfu_data = master_dfu_data.concat(lines[line], '\r\n');
+                    // console.log(master_dfu_data);                    
+                }
+            }appSData.push(data);
+            saveMasterFile();                  
+        };
+        reader.readAsText(app_path);
+    }
+
+    let saveMasterFile = () => {
+    	var date = new Date();
+        var mydate = date.getFullYear() + ("0" + (date.getMonth() + 1)).slice(-2) + ("0" + date.getDate()).slice(-2) + ("0" + date.getHours() ).slice(-2) + ("0" + date.getMinutes()).slice(-2) + ("0" + date.getSeconds()).slice(-2);
+        
+        master_dfu_data += 'q\r\n';
+        
+        // Convert the text to BLOB.
+        const textToBLOB = new Blob([master_dfu_data], { type: 'text/plain' });
+        const sFileName = 'MasterDFU_'+ mydate +'.txt';	   // The file to save the data.
+        document.getElementById("msg").innerHTML = sFileName + " file has been downloaded and avilable in Download location.";
+        let newLink = document.createElement("a");
+        newLink.download = sFileName;
+
+        if (window.webkitURL != null) {
+            newLink.href = window.webkitURL.createObjectURL(textToBLOB);
+        }
+        else {
+            newLink.href = window.URL.createObjectURL(textToBLOB);
+            newLink.style.display = "none";
+            document.body.appendChild(newLink);
+        }
+
+        newLink.click(); 
+    }
+</script>
+</html>
