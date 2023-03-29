@@ -80,6 +80,7 @@
     var dfu_index = 0;
     var dfu_packet_max_size = 0;
     var total_sum = 0;
+    var dfu_g_crc = 0xFFFF;
 
     function crc_update(crc, byte){
         var x;
@@ -150,6 +151,7 @@
         for(let i = 0; i < len; i++){
             view.setUint8(6 + i, data[2][i]);
             crc = crc_update(crc, data[2][i]);
+            dfu_g_crc = crc_update(dfu_g_crc, data[2][i]);
         }
         view.setUint16(len+6, crc, true);
         // console.log(view);
@@ -159,15 +161,15 @@
     function write_etiApp()
     {
         cmn_DFU_Packet = [];
-        const bufferl = new ArrayBuffer(2);
+        const bufferl = new ArrayBuffer(4);
         const viewl = new DataView(bufferl);
         const buffer = new ArrayBuffer(4);
         const view = new DataView(buffer);
-        var dow_add = 0x14400;
-        view.setInt8(0, 0xF0);
-        view.setInt8(1, 0xF1);
-        view.setInt8(2, 0xFE);
-        view.setInt8(3, 0xED);
+        var dow_add = 0x14500;
+        view.setInt8(0, 0xF1);
+        view.setInt8(1, 0xF0);
+        view.setInt8(2, 0xED);
+        view.setInt8(3, 0xFE);        
         cmn_DFU_Packet.push(view);
         for(let i = 0; i < startAddress.length; i++){
             var block_length = segmentData[i].length;
@@ -199,8 +201,9 @@
                 block_length -= transfer_length;
             }
         }
-        viewl.setInt8(0, 0xF0);
-        viewl.setInt8(1, 0xF2);
+        viewl.setInt8(0, 0xF2);
+        viewl.setInt8(1, 0xF0);
+        viewl.setInt16(2, dfu_g_crc, true);
         cmn_DFU_Packet.push(viewl); 
         dfu_packet_max_size = cmn_DFU_Packet.length;
         console.log("Max size, 1st DFU ->", dfu_packet_max_size, cmn_DFU_Packet[dfu_index]);
@@ -630,13 +633,14 @@
         function handelCN2dfu(event)
         {
             let cmDFU_data = event.target.value.getUint8(0);
+            // let cm16bit_data = event.target.value.getUint16(0);
             var bar = document.querySelector(".progress-bar");             
             document.getElementById('msp_dfu_status').innerHTML = String(cmDFU_data) + ' (' + String(dfu_index) + ')';
             bar.style.width = ((100*dfu_index)/dfu_packet_max_size).toFixed(2) + "%";
             bar.innerText = ((100*dfu_index)/dfu_packet_max_size).toFixed(2) + "%";
             if (cmDFU_data == 0x0F){
                 if(dfu_index < dfu_packet_max_size){                    
-                        console.log(cmDFU_data, dfu_index);
+                        // console.log(cmDFU_data, dfu_index);
                         writeCMN(cmn_DFU_Packet[dfu_index]);
                         console.log("for DFU", dfu_index, dfu_packet_max_size, cmn_DFU_Packet[dfu_index]);
                         dfu_index += 1;}
@@ -685,12 +689,21 @@
                 document.getElementById('msp_dfu_status').innerHTML = "DFU Complete, restarting!" + datetime;
                 ccn.addEventListener('characteristicvaluechanged', handelCommandNotification);
             }
+            else if(cmDFU_data == 0x02)
+            {
+                log('DFU Roll Back! ***Global CRC Error***');
+                log(datetime);
+                document.getElementById('msp_dfu_end').innerHTML = datetime;
+                dfu_index += 1;
+                document.getElementById('msp_dfu_status').innerHTML = "DFU Roll Back! ***Global CRC Error***---> restarting!" + datetime;
+                ccn.addEventListener('characteristicvaluechanged', handelCommandNotification);
+            }
             else {
                 console.log("Unknown error..!", dfu_index);
                 ccn.addEventListener('characteristicvaluechanged', handelCN2dfu);
             }
-            total_sum += cmDFU_data;
-            console.log(total_sum);
+            // total_sum += cmDFU_data;
+            console.log(cmDFU_data.toString(16));//, cm16bit_data.toString(16));            
         }
         async function writeCMN(data){
             if(!ccn) return;
@@ -710,7 +723,7 @@
                     document.getElementById('msp_dfu_start').innerHTML = datetime;
                 }
                 ccn.addEventListener('characteristicvaluechanged', handelCN2dfu);
-                console.log("cnnW", dfu_index);
+                // console.log("cnnW", dfu_index);
                 // await ccn.readValue();
             } catch(error) {
                 log('Argh! ' + error);
