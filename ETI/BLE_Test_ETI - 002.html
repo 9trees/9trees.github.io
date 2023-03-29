@@ -1,0 +1,907 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <style type="text/css">
+        .bg-black {
+            background-color: #111 !important;
+              color: #eee;
+          }
+    </style>
+
+    <title>ETI BLE Test</title>
+  </head>
+  <body id="mybodyDIV">
+    <script>
+        var ChromeSamples = {
+            log: function () {
+                var line = Array.prototype.slice.call(arguments).map(function (argument) {
+                    return typeof argument === 'string' ? argument : JSON.stringify(argument);
+                }).join(' ');
+
+                document.querySelector('#log').textContent += line + '\n';
+            },
+
+            clearLog: function () {
+                document.querySelector('#log').textContent = '';
+            },
+
+            setStatus: function (status) {
+                document.querySelector('#status').textContent = status;
+            },
+
+            setContent: function (newContent) {
+                var content = document.querySelector('#content');
+                while (content.hasChildNodes()) {
+                    content.removeChild(content.lastChild);
+                }
+                content.appendChild(newContent);
+            }
+        };
+    function DLmodeFun(DLmodev) {
+	   var element = document.getElementById("mybodyDIV");
+	   element.classList.toggle("bg-black");       
+       if(document.getElementById("DLmode").value == "1")
+       {
+           document.getElementById("DLmode").innerHTML = "Light Mode";
+           document.getElementById("DLmode").value = "0";
+       }
+       else{
+        document.getElementById("DLmode").innerHTML = "Dark Mode";
+        document.getElementById("DLmode").value = "1";
+       }       
+	}
+
+    /*DFU Implimentation*/
+    const APP_BSL_BOOT_ENTRY_CMD = 0xAA;
+    const APP_BSL_BOOT_VERSION = 0xA1;
+    const BSL_VERSION_CMD = 0x19;
+    const BSL_ERASE_APP_CMD = 0x15;
+    const BSL_RX_APP_CMD = 0x10;
+    const BSL_JMP_APP_CMD = 0x1C;
+    const BSL_OK_RES = 0x00;
+    const BSL_HEADER = 0x80;
+
+    const CRC_Addr = 0x4000;  //# (_Appl_Checksum in target's linker command file)
+    const App_StartAddress = 0x4002;  //# (_Appl_Start_Memory in target's linker command file)
+    const App_EndAddress = 0xF7FF;  //# (_Appl_End in in target's linker command file)
+    const App_StartAddress_Upper = 0x10000;  //# (_Flex_Start in target's linker command file)
+    const App_EndAddress_Upper = 0x23FF7;  //# (_Flex_End in target's linker command file)
+
+    var startAddress = [];
+    var segmentData = [];
+    var cmn_DFU_Packet = [];
+    var dfu_index = 0;
+    var dfu_packet_max_size = 0;
+    var total_sum = 0;
+    var dfu_g_crc = 0xFFFF;
+
+    function crc_update(crc, byte){
+        var x;
+        x = ((crc >> 8) ^ byte) & 0xFF;
+        x ^= x >> 4;
+        return ((crc << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF;
+    }
+
+    function three_bytes(address){
+        //Convert a 2 byte address to a 3 byte address
+        var address_3 = [];
+        address_3[0] = address & 0xff;
+        address_3[1] = (address >> 8) & 0xff;
+        address_3[2] = (address >> 16) & 0xff;
+        // console.log(address, address_3);
+        return address_3;        
+    }
+    
+    function cmd_write(cmd){
+        let len = 1;        
+        const buffer = new ArrayBuffer(5);
+        const view = new DataView(buffer);
+        view.setUint8(0, BSL_HEADER);
+        view.setUint8(1, len);
+        view.setUint8(2, cmd);
+        view.setUint16(3, crc_update(0xffff, cmd), true);
+        // console.log(view);
+        return view;
+    }
+
+    function data_write(cmd, data){
+        let alen = data[0].length;
+        let len = data[1].length;
+        let crc = 0xffff;
+        const buffer = new ArrayBuffer(5+alen+len);
+        const view = new DataView(buffer);
+        view.setUint8(0, BSL_HEADER);
+        view.setUint8(1, alen+len+1);
+        view.setUint8(2, cmd);
+        crc = crc_update(crc, cmd);
+        for(let j = 0; j < alen; j++){
+            view.setUint8(3+j, data[0][j]);
+            crc = crc_update(crc, data[0][j]);
+        }
+        for(let i = 0; i < len; i++){
+            view.setUint8(6 + i, data[1][i]);
+            crc = crc_update(crc, data[1][i]);
+        }
+        view.setUint16(len+6, crc, true);
+        // console.log(view);
+        return view;
+    }
+
+    function eti_data_write(data)
+    {
+        let len = data[2].length;
+        let crc = 0xFFFF;
+        const buffer = new ArrayBuffer(8+len);
+        const view = new DataView(buffer);
+        view.setInt8(0, data[0][0]);
+        view.setInt8(1, data[0][1]);
+        view.setInt8(2, len);
+        crc = crc_update(crc, len);
+        for(let j = 0; j < 3; j++){
+            view.setUint8(3+j, data[1][j]); 
+            crc = crc_update(crc, data[1][j]);           
+        }
+        for(let i = 0; i < len; i++){
+            view.setUint8(6 + i, data[2][i]);
+            crc = crc_update(crc, data[2][i]);
+            dfu_g_crc = crc_update(dfu_g_crc, data[2][i]);
+        }
+        view.setUint16(len+6, crc, true);
+        // console.log(view);
+        return view;
+    }
+
+    function write_etiApp()
+    {
+        cmn_DFU_Packet = [];
+        const bufferl = new ArrayBuffer(4);
+        const viewl = new DataView(bufferl);
+        const buffer = new ArrayBuffer(4);
+        const view = new DataView(buffer);
+        var dow_add = 0x14500;
+        view.setInt8(0, 0xF1);
+        view.setInt8(1, 0xF0);
+        view.setInt8(2, 0xED);
+        view.setInt8(3, 0xFE);        
+        cmn_DFU_Packet.push(view);
+        for(let i = 0; i < startAddress.length; i++){
+            var block_length = segmentData[i].length;
+            var start_index = 0;            
+            end_index = 0;
+            transfer_length = 0;
+            if (Number(startAddress[i]) < (0x23f80 - 0x01)){
+                startAddress[i] = dow_add;
+            }//end for duel imag system
+            console.log(block_length);
+            while(block_length >0)
+            {
+                if(block_length > 12)
+                {
+                    transfer_length = 12;                    
+                }
+                else
+                {
+                    transfer_length = block_length;
+                }
+                var block_data = [];
+                block_data.push([0xF0, 0xF0]);
+                dow_add = Number(startAddress[i]) + start_index;  //for duel imag system
+                block_data.push(three_bytes(Number(dow_add)));    //for duel imag system 
+                end_index = start_index + transfer_length;
+                block_data.push(segmentData[i].slice(start_index, end_index));
+                start_index = end_index;
+                cmn_DFU_Packet.push(eti_data_write(block_data));
+                block_length -= transfer_length;
+            }
+        }
+        viewl.setInt8(0, 0xF2);
+        viewl.setInt8(1, 0xF0);
+        viewl.setInt16(2, dfu_g_crc, true);
+        cmn_DFU_Packet.push(viewl); 
+        dfu_packet_max_size = cmn_DFU_Packet.length;
+        console.log("Max size, 1st DFU ->", dfu_packet_max_size, cmn_DFU_Packet[dfu_index]);
+        dfu_index = 1;
+        writeCMN(cmn_DFU_Packet[0]);
+        
+    }
+
+    function write_APP()
+    {
+        cmn_DFU_Packet = [];
+        // dow_add = 0x14440;
+        // console.log(startAddress, segmentData);
+        cmn_DFU_Packet.push(cmd_write(BSL_VERSION_CMD));
+        cmn_DFU_Packet.push(cmd_write(BSL_ERASE_APP_CMD));
+        // console.log(startAddress.length);
+        // cmn_DFU_Packet.push(new Uint8Array([0xF0, 0xF1]));
+        for(let i = 0; i < startAddress.length; i++)
+        {
+            var block_length = segmentData[i].length;
+            var start_index = 0;            
+            end_index = 0;
+            transfer_length = 0;
+            //console.log(block_length);
+            //for duel imag system
+            // if (Number(startAddress[i]) < (0x23f80 - 1)){
+            //     startAddress[i] = dow_add;
+            // }//end for duel imag system
+            while(block_length >0)
+            {//console.log(block_length);
+                if(block_length > 12)
+                {
+                    transfer_length = 12;                    
+                }
+                else
+                {
+                    transfer_length = block_length;
+                }
+                var block_data = [];
+                // dow_add = Number(startAddress[i]) + start_index;  //for duel imag system
+                // block_data.push(three_bytes(Number(dow_add)));    //for duel imag system            
+                block_data.push(three_bytes(Number(startAddress[i]) + start_index));
+                end_index = start_index + transfer_length;
+                block_data.push(segmentData[i].slice(start_index, end_index));
+                start_index = end_index;
+                cmn_DFU_Packet.push(data_write(BSL_RX_APP_CMD, block_data));
+                block_length -= transfer_length;                
+            }
+        }cmn_DFU_Packet.push(cmd_write(BSL_JMP_APP_CMD));
+        // dfu_index = cmn_DFU_Packet.length;
+        // console.log(dfu_index);
+        // cmn_DFU_Packet.push(new Uint8Array([0xF0, 0xF2]));  
+        dfu_packet_max_size = cmn_DFU_Packet.length;
+        if(document.querySelector('.form-check-input').checked){
+            writeCMN(new Uint8Array([0xAA, 0x00]));
+        }
+        else{
+            console.log("for DFU");
+            writeCMN(cmn_DFU_Packet[dfu_index]);
+            dfu_index++;
+        }     
+        
+    }
+
+    function msp_dfu_btn(event)
+    {        
+        var data = [];
+        var address_index = 0;
+        var dfu_path = document.getElementById("msp_dfu_file").files[0];
+        var reader = new FileReader();
+        reader.onload = function(progressEvent){
+            // Entire file
+            // console.log(this.result);
+
+            // By lines
+            var lines = this.result.split('\n');
+            for(var line = 0; line < lines.length; line++)
+            {
+                // console.log(lines[line]);
+                var line_data = lines[line].split(' ');                
+                if(line_data[0][0] == '@')
+                {   
+                    var add = [];                    
+                    // console.log(address_index);             
+                    add.push(parseInt(line_data[0].slice(1), 16));
+                    startAddress.push(add);
+                    if(data.length > 0)
+                    {
+                        segmentData.push(data);
+                        data = [];
+                    }
+                }
+                else if(line_data[0][0] == 'q')
+                {
+                    break;
+                }
+                else
+                {                    
+                    for(var i = 0; i < line_data.length; i++)
+                    {
+                        data.push(parseInt(line_data[i], 16));
+                    }                    
+                }
+            }segmentData.push(data);
+            // write_APP();
+            write_etiApp();     // duel img system       
+        };
+        reader.readAsText(dfu_path);        
+        
+        
+    }
+    /*END OF DFU Implimentation*/
+    </script>
+    <script>
+        log = ChromeSamples.log;
+
+        function isWebBluetoothEnabled() {
+            if (navigator.bluetooth) {
+                return true;
+            } else {
+                ChromeSamples.setStatus('Web Bluetooth API is not available.\n' +
+                    'Please make sure the "Experimental Web Platform features" flag is enabled.');
+                return false;
+            }
+        }
+    </script>
+    <div class="container">
+        <!-- Content here -->
+        <div>
+            <p class="fs-1">ETI BLE Test Application <a href ="#" class="fs-6">Developed by Research and Development</a></p>
+        </div>
+            <button id="sbtn" class="btn btn-primary btn-sm" type="button" onclick="sbtn()">Scan</button>
+            <button id="dbtn" class="btn btn-danger btn-sm" type="button" onclick="dbtn()">Disconnect</button>
+            <button id="DLmode" class="btn btn-dark btn-sm float-right" onclick="DLmodeFun(this)" value="1">Dark Mode</button>
+        <hr>
+        <div id="msp_dfu_div" class="float-right">
+            <input type="file" id="msp_dfu_file" accept=".txt" /><br><br>
+            <button id="msp_dfu_btn" class="btn btn-primary btn-sm" type="button" onclick="msp_dfu_btn()">Start MSP DFU</button>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
+                <label class="form-check-label" for="flexSwitchCheckChecked">From APP</label>
+              </div>
+            <p>Log: <a id="msp_dfu_status" >N/A</a>.</p>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <p>DFU Start Time: <a id="msp_dfu_start" >N/A</a>.</p>
+            <p>DFU End Time: <a id="msp_dfu_end" >N/A</a>.</p>
+        </div>
+        <hr>
+        <div>
+            <div>
+                <canvas id="myChart"></canvas>
+            </div>
+            <p class="fs-6">
+                <strong>Battery</strong>: <a href="#" id="bat">Nil</a>,
+                <strong>Sensor 1 Data</strong>: <a href="#" id="s1d">Nill</a>
+            </p>
+
+            <input class="form-check-input" type="radio" name="CFbtn" value = "0" id="C" onclick="handleClick(this);">
+            <label class="form-check-label" for="C">°C</label>
+
+            <input class="form-check-input" type="radio" name="CFbtn" value = "1" id="F" onclick="handleClick(this);">
+            <label class="form-check-label" for="F">°F</label>&nbsp;&nbsp;&nbsp;
+            
+            <label for="MISelect">Measurment Interval</label>
+            <select id="MISelect" aria-label="MI label select" onchange="handelChange(this)">
+                <option value="1" selected> </option>
+                <option value="1">1 Seconds</option>
+                <option value="2">2 Seconds</option>
+                <option value="3">3 Seconds</option>
+                <option value="5">5 Seconds</option>
+                <option value="10">10 Seconds</option>
+                <option value="15">15 Seconds</option>
+                <option value="30">30 Seconds</option>
+                <option value="60">60 Seconds</option>
+            </select>&nbsp;&nbsp;&nbsp;
+            <button type="button" class="btn btn-success btn-sm float-right" value="1" id="clist" onclick="handelChecklist()">Start Checklist</button>
+            <hr>        
+            <p class="fs-6">
+                <strong>Item Name</strong>: <a href="#" id="iname">Nil</a>,
+                <strong>Min Temp<sup>°C</sup></strong>: <a href="#" id="mint">Nill</a>,
+                <strong>Max Temp<sup>°C</sup></strong>: <a href="#" id="maxt">Nill</a>,
+                <strong>Status</strong>: <a href="#" id="cstatus">Nil</a>
+            </p>
+            <hr>
+            <div id="noti"></div>              
+        </div>
+        <hr>
+        <div>
+            <pre id="log"></pre>
+        </div>
+      </div>
+
+    <!-- Optional JavaScript; choose one of the two! -->
+    <script>        
+        var device, eti_srv, dis_srv, bas_srv;
+        var cbl, cs1d, cins, ccn, cs1s, ctc, cto;
+        //Checklist_Data
+        var items= [["Cold Water", 10.6, -10.9, 0],
+            ["Warm Water", 53.3, 40.2, 0],
+            ["Chicken", 78.2, 74.8, 0],
+            ["Beef", 55.1, 45.5, 0],
+            ["Spaghetti Bolognese", 55.9, 45.6, 0]
+            ];
+        var units = "";
+        var s1t, CF, mInterval, autoOff, s2e, st, em, checklist = 0;
+        var x = 1, itemIndex = 0;
+        var exitLoop = false;
+        var xValues = [];
+        var yValues = [];
+        var myChart = new Chart("myChart", {
+            type: "line",
+            data: {
+            labels: xValues,
+            datasets: [{
+                fill: false,
+                lineTension: 0,
+                backgroundColor: "rgba(0,0,255,1.0)",
+                borderColor: "rgba(0,0,255,0.1)",
+                data: yValues
+            }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                tooltips: {enabled: false},
+                hover: {mode: null},
+                legend: {display: false},
+                scales: {
+                    yAxes:[{
+                        position: 'right'
+                    }]
+                }
+            }
+        });        
+        function dbtn() 
+        {
+            if (device.gatt.connected) {
+                log('Disconnecting from Bluetooth Device...');
+                device.gatt.disconnect();
+                document.getElementById("s1d").innerHTML = "Disconnected";
+                document.getElementById("bat").innerHTML = "Disconnected";
+            } else {
+                log(device.name + '> Bluetooth Device is already disconnected');
+            }
+        }
+        function onDisconnected(event) {
+        // Object event.target is Bluetooth Device getting disconnected.
+        log('> Bluetooth Device auto disconnected...!');
+        document.getElementById("sbtn").innerHTML = "Scan"; 
+        document.querySelector('#sbtn').disabled = false;
+        document.getElementById("log").innerHTML = " ";
+        }
+        async function sbtn()
+        {
+            try {
+                    log('Requesting Bluetooth Device...');
+                    device = await navigator.bluetooth.requestDevice({
+                        optionalServices: ['battery_service', 'device_information', '45544942-4c55-4554-4845-524db87ad700'], acceptAllDevices: true,
+                        //filters: [{ manufacturerData: [{"companyIdentifier":886}] }]
+                    });
+                    
+                    device.addEventListener('gattserverdisconnected', onDisconnected);
+                    log('Connecting to GATT Server...');
+                    const server = await device.gatt.connect();
+                    document.getElementById("sbtn").innerHTML = "Connected"; 
+                    document.querySelector('#sbtn').disabled = true;
+                    log('Connected to: ' + device.name);
+                    eti_srv = await server.getPrimaryService('45544942-4c55-4554-4845-524db87ad700');
+
+                    cs1d = await eti_srv.getCharacteristic('45544942-4c55-4554-4845-524db87ad701');
+                    cs1d.addEventListener('characteristicvaluechanged', handleSensor1Changed);
+                    await cs1d.readValue();
+                    await cs1d.startNotifications();
+
+                    ccn = await eti_srv.getCharacteristic('45544942-4c55-4554-4845-524db87ad705');
+                    ccn.addEventListener('characteristicvaluechanged', handelCommandNotification);
+                    await ccn.readValue();
+                    await ccn.startNotifications();
+
+                    cs1s = await eti_srv.getCharacteristic('45544942-4c55-4554-4845-524db87ad707');
+                    
+                    cins = await eti_srv.getCharacteristic('45544942-4c55-4554-4845-524db87ad709');
+                    cins.addEventListener('characteristicvaluechanged', handleInstrumentSettings);
+                    await cins.readValue();
+
+                    ctc = await eti_srv.getCharacteristic('45544942-4c55-4554-4845-524db87ad70b');
+                    
+                    cto = await eti_srv.getCharacteristic('45544942-4c55-4554-4845-524db87ad70c');
+                    
+                    
+                    //BAS Services
+                    bas_srv = await server.getPrimaryService('0000180f-0000-1000-8000-00805f9b34fb');
+                    cbl = await bas_srv.getCharacteristic('00002a19-0000-1000-8000-00805f9b34fb');
+                    cbl.addEventListener('characteristicvaluechanged', handleBatChanged);
+                    await cbl.readValue();
+                    await cbl.startNotifications();
+
+                    //DIS Services
+                    dis_srv = await server.getPrimaryService('0000180a-0000-1000-8000-00805f9b34fb');
+                    log('Getting Device Information Characteristics...');
+                    const characteristics = await dis_srv.getCharacteristics();
+
+                    const decoder = new TextDecoder('utf-8');
+                    for (const characteristic of characteristics) {
+                        switch (characteristic.uuid) {
+
+                            case BluetoothUUID.getCharacteristic('manufacturer_name_string'):
+                            await characteristic.readValue().then(value => {
+                                log('> Manufacturer Name String: ' + decoder.decode(value));
+                            });
+                            break;
+
+                            case BluetoothUUID.getCharacteristic('model_number_string'):
+                            await characteristic.readValue().then(value => {
+                                log('> Model Number String: ' + decoder.decode(value));
+                            });
+                            break;
+
+                            case BluetoothUUID.getCharacteristic('hardware_revision_string'):
+                            await characteristic.readValue().then(value => {
+                                log('> Hardware Revision String: ' + decoder.decode(value));
+                            });
+                            break;
+
+                            case BluetoothUUID.getCharacteristic('firmware_revision_string'):
+                            await characteristic.readValue().then(value => {
+                                log('> Firmware Revision String: ' + decoder.decode(value));
+                            });
+                            break;
+
+                            case BluetoothUUID.getCharacteristic('software_revision_string'):
+                            await characteristic.readValue().then(value => {
+                                log('> Software Revision String: ' + decoder.decode(value));
+                            });
+                            break;
+
+                            case BluetoothUUID.getCharacteristic('system_id'):
+                            await characteristic.readValue().then(value => {
+                                log('> System ID: ');
+                                log('  > Manufacturer Identifier: ' +
+                                    padHex(value.getUint8(4)) + padHex(value.getUint8(3)) +
+                                    padHex(value.getUint8(2)) + padHex(value.getUint8(1)) +
+                                    padHex(value.getUint8(0)));
+                                log('  > Organizationally Unique Identifier: ' +
+                                    padHex(value.getUint8(7)) + padHex(value.getUint8(6)) +
+                                    padHex(value.getUint8(5)));
+                            });
+                            break;
+
+                            case BluetoothUUID.getCharacteristic('ieee_11073-20601_regulatory_certification_data_list'):
+                            await characteristic.readValue().then(value => {
+                                log('> IEEE 11073-20601 Regulatory Certification Data List: ' +
+                                    decoder.decode(value));
+                            });
+                            break;
+
+                            case BluetoothUUID.getCharacteristic('pnp_id'):
+                            await characteristic.readValue().then(value => {
+                                log('> PnP ID:');
+                                log('  > Vendor ID Source: ' +
+                                    (value.getUint8(0) === 1 ? 'Bluetooth' : 'USB'));
+                                if (value.getUint8(0) === 1) {
+                                log('  > Vendor ID: ' +
+                                    (value.getUint8(1) | value.getUint8(2) << 8));
+                                } else {
+                                log('  > Vendor ID: ' +
+                                    getUsbVendorName(value.getUint8(1) | value.getUint8(2) << 8));
+                                }
+                                log('  > Product ID: ' +
+                                    (value.getUint8(3) | value.getUint8(4) << 8));
+                                log('  > Product Version: ' +
+                                    (value.getUint8(5) | value.getUint8(6) << 8));
+                            });
+                            break;
+
+                            default: log('> Unknown Characteristic: ' + characteristic.uuid);
+                        }
+                    }           
+                } catch(error) {
+                    log('Argh! ' + error);
+                }
+        }
+        function handelCommandNotificationdfu(event)
+        {
+            let cmDFU_data = event.target.value.getUint8(0);
+            var bar = document.querySelector(".progress-bar");             
+            document.getElementById('msp_dfu_status').innerHTML = String(cmDFU_data) + ' (' + String(dfu_index) + ')';
+            bar.style.width = ((100*dfu_index)/dfu_packet_max_size).toFixed(2) + "%";
+            bar.innerText = ((100*dfu_index)/dfu_packet_max_size).toFixed(2) + "%";
+            if (cmDFU_data == 0 | cmDFU_data == 0xA1){
+                console.log(cmDFU_data, dfu_index);
+                writeCMN(cmn_DFU_Packet[dfu_index]);
+                dfu_index++;
+            }
+            else if(cmDFU_data == 0xFF)
+            {
+                var currentdate = new Date(); 
+                var datetime = "Last Sync: " + currentdate.getDate() + "/"
+                                + (currentdate.getMonth()+1)  + "/" 
+                                + currentdate.getFullYear() + " @ "  
+                                + currentdate.getHours() + ":"  
+                                + currentdate.getMinutes() + ":" 
+                                + currentdate.getSeconds();
+                log('DFU Complete, restarting');
+                log(datetime);
+                document.getElementById('msp_dfu_end').innerHTML = datetime;
+                dfu_index = 0;
+                document.getElementById('msp_dfu_status').innerHTML = "DFU Complete, restarting!" + datetime;
+                ccn.addEventListener('characteristicvaluechanged', handelCommandNotification);
+                // await cins.readValue();
+            }
+            else //if(cmDFU_data == 0x52)
+            {   
+                // dfu_index = 0;
+                if(dfu_index > 0)
+                {dfu_index--;
+                console.log("ERROR!.......", dfu_index);
+                writeCMN(cmn_DFU_Packet[dfu_index]);
+                dfu_index++;}
+                // else{writeCMN(cmn_DFU_Packet[dfu_index])
+                // dfu_index++;}
+            }
+            total_sum += cmDFU_data;
+            console.log(total_sum);
+        }
+        function handelCN2dfu(event)
+        {
+            let cmDFU_data = event.target.value.getUint8(0);
+            // let cm16bit_data = event.target.value.getUint16(0);
+            var bar = document.querySelector(".progress-bar");             
+            document.getElementById('msp_dfu_status').innerHTML = String(cmDFU_data) + ' (' + String(dfu_index) + ')';
+            bar.style.width = ((100*dfu_index)/dfu_packet_max_size).toFixed(2) + "%";
+            bar.innerText = ((100*dfu_index)/dfu_packet_max_size).toFixed(2) + "%";
+            if (cmDFU_data == 0x0F){
+                if(dfu_index < dfu_packet_max_size){                    
+                        // console.log(cmDFU_data, dfu_index);
+                        writeCMN(cmn_DFU_Packet[dfu_index]);
+                        console.log("for DFU", dfu_index, dfu_packet_max_size, cmn_DFU_Packet[dfu_index]);
+                        dfu_index += 1;}
+                // if(dfu_index == dfu_packet_max_size){
+                //     console.log("End of DFU", dfu_index, dfu_packet_max_size, cmn_DFU_Packet[dfu_index-1]);
+                //     var currentdate = new Date(); 
+                //     var datetime = "Last Sync: " + currentdate.getDate() + "/"
+                //                     + (currentdate.getMonth()+1)  + "/" 
+                //                     + currentdate.getFullYear() + " @ "  
+                //                     + currentdate.getHours() + ":"  
+                //                     + currentdate.getMinutes() + ":" 
+                //                     + currentdate.getSeconds();
+                //     log('DFU Complete, restarting');
+                //     log(datetime);
+                //     document.getElementById('msp_dfu_end').innerHTML = datetime;
+                //     dfu_index += 1;
+                //     document.getElementById('msp_dfu_status').innerHTML = "DFU Complete, restarting!" + datetime;
+                //     ccn.addEventListener('characteristicvaluechanged', handelCommandNotification);
+                // }                
+            }
+            else if(cmDFU_data == 0x0C)
+            {   
+                // dfu_index = 0;
+                if(dfu_index > 0)
+                {dfu_index--;
+                console.log("ERROR!.......", dfu_index);
+                writeCMN(cmn_DFU_Packet[dfu_index]);
+                dfu_index++;}
+                // else{writeCMN(cmn_DFU_Packet[dfu_index])
+                // dfu_index++;}
+            }
+            else if(cmDFU_data == 0x05)
+            {
+                console.log("End of DFU", dfu_index, dfu_packet_max_size, cmn_DFU_Packet[dfu_index-1]);
+                var currentdate = new Date(); 
+                var datetime = "Last Sync: " + currentdate.getDate() + "/"
+                                + (currentdate.getMonth()+1)  + "/" 
+                                + currentdate.getFullYear() + " @ "  
+                                + currentdate.getHours() + ":"  
+                                + currentdate.getMinutes() + ":" 
+                                + currentdate.getSeconds();
+                log('DFU Complete, restarting');
+                log(datetime);
+                document.getElementById('msp_dfu_end').innerHTML = datetime;
+                dfu_index += 1;
+                document.getElementById('msp_dfu_status').innerHTML = "DFU Complete, restarting!" + datetime;
+                ccn.addEventListener('characteristicvaluechanged', handelCommandNotification);
+            }
+            else if(cmDFU_data == 0x02)
+            {
+                log('DFU Roll Back! ***Global CRC Error***');
+                log(datetime);
+                document.getElementById('msp_dfu_end').innerHTML = datetime;
+                dfu_index += 1;
+                document.getElementById('msp_dfu_status').innerHTML = "DFU Roll Back! ***Global CRC Error***---> restarting!" + datetime;
+                ccn.addEventListener('characteristicvaluechanged', handelCommandNotification);
+            }
+            else {
+                console.log("Unknown error..!", dfu_index);
+                ccn.addEventListener('characteristicvaluechanged', handelCN2dfu);
+            }
+            // total_sum += cmDFU_data;
+            console.log(cmDFU_data.toString(16));//, cm16bit_data.toString(16));            
+        }
+        async function writeCMN(data){
+            if(!ccn) return;
+            try{
+                await ccn.writeValueWithoutResponse(data);
+                if (dfu_index == 0 | dfu_index == 1)
+                {
+                    var currentdate = new Date(); 
+                    var datetime = "Last Sync: " + currentdate.getDate() + "/"
+                                    + (currentdate.getMonth()+1)  + "/" 
+                                    + currentdate.getFullYear() + " @ "  
+                                    + currentdate.getHours() + ":"  
+                                    + currentdate.getMinutes() + ":" 
+                                    + currentdate.getSeconds();
+                    log('DFU Started....');
+                    log(datetime);
+                    document.getElementById('msp_dfu_start').innerHTML = datetime;
+                }
+                ccn.addEventListener('characteristicvaluechanged', handelCN2dfu);
+                // console.log("cnnW", dfu_index);
+                // await ccn.readValue();
+            } catch(error) {
+                log('Argh! ' + error);
+            }
+        }
+        async function writeINS()
+        {            
+            // create an ArrayBuffer with a size in bytes
+            const buffer = new ArrayBuffer(7);
+            const view = new DataView(buffer);
+            view.setUint8(0,CF); 
+            view.setUint16(1,mInterval, true); 
+            view.setUint16(3,autoOff, true); 
+            view.setUint8(5,s2e); 
+            view.setUint8(6,st);
+            // log(view);
+            if(!cins) return;
+            try{
+                await cins.writeValueWithoutResponse(view);
+                cins.addEventListener('characteristicvaluechanged', handleInstrumentSettings);
+                await cins.readValue();
+            } catch(error) {
+                log('Argh! ' + error);
+            }
+            // var enc = new TextEncoder(); // always utf-8
+            // console.log(enc.encode("Hot Water"));
+        }
+        function handleClick(CFbtn)
+        {
+            CF = CFbtn.value;
+            writeINS();
+        }
+        function handelChange(MISelection)
+        {
+            mInterval = MISelection.value;
+            writeINS();
+        }
+        function handleInstrumentSettings(event) {
+            CF = event.target.value.getUint8(0);
+            mInterval = event.target.value.getUint16(1, true);
+            autoOff= event.target.value.getUint16(3, true);
+            s2e = event.target.value.getUint8(4);
+            st = event.target.value.getUint8(5);
+            em = event.target.value.getUint8(6);
+            // document.querySelector('#MISelect option:eq(mInterval)').prop('selected', true);
+            if (CF === 1) {
+                units = " °F";
+                document.querySelector('#F').checked = true;
+                document.querySelector('#C').checked = false;
+            }
+            else {
+                units = " °C";
+                document.querySelector('#F').checked = false;
+                document.querySelector('#C').checked = true;
+            }
+        }        
+        function handleSensor1Changed(event) {
+            s1t = event.target.value.getFloat32(0, true);
+            if(CF) s1t = (s1t * (9/5)) + 32;
+            document.getElementById("s1d").innerHTML = s1t + units;
+            // console.log(checklist, s1t, items[itemIndex][1], items[itemIndex][2]);
+            if(checklist){
+                
+                if(s1t <= items[itemIndex][1] && s1t >= items[itemIndex][2])
+                {
+                    document.getElementById("cstatus").innerHTML = "Pass";
+                }
+                else document.getElementById("cstatus").innerHTML = "Fail";
+            }
+            // x = x+1;
+            xValues.push(new Date().toLocaleTimeString());
+            yValues.push(s1t);
+            myChart.update();    
+        }
+        function handelCommandNotification(event)
+        {
+            // console.log(event.target.value);
+            let cmData = event.target.value.getUint16(0, true);
+            if(cmData == 1)
+            {
+                document.getElementById("noti").innerHTML += `
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>Button!</strong> Button is pressed...!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>`;
+                if(checklist){
+                itemIndex++;
+                if(itemIndex >= items.length){
+                    // checklist = 0;
+                    // itemIndex = 0;
+                    // UpadteTextOption();
+                    handelChecklist();
+                }
+                updateChecklist();}
+            }
+            else if (cmData == 2) {
+                document.getElementById("noti").innerHTML += `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Shutdown!</strong> ThempTest Blue Shoutdown...!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>`;                               
+            } 
+            else if (cmData == 0 | cmData == 0x0a | cmData == 0xA1){
+                console.log(dfu_index);
+                writeCMN(cmn_DFU_Packet[dfu_index]);
+                dfu_index++;
+            }
+            else {
+                document.getElementById("noti").innerHTML = " ";
+            }
+        }
+        function handleBatChanged(event)
+        {
+            let batteryLevel = event.target.value.getUint8();
+            document.getElementById("bat").innerHTML = batteryLevel + '%';
+        }
+        function handelChecklist(clist){
+            if(document.getElementById("clist").value == "1")
+            {
+                document.getElementById("clist").classList.remove('btn-success')
+                document.getElementById("clist").classList.add('btn-danger')
+                document.getElementById("clist").innerHTML = "End Checklist";
+                document.getElementById("clist").value = "0";                
+                checklist = 1;                
+            }
+            else{
+                document.getElementById("clist").classList.remove('btn-danger')
+                document.getElementById("clist").classList.add('btn-success')
+                document.getElementById("clist").innerHTML = "Start Checklist";
+                document.getElementById("clist").value = "1";
+                itemIndex = 0;
+                checklist = 0;                                
+            } 
+            UpadteTextOption();
+            updateChecklist();
+        }
+        async function UpadteTextOption(){ //Start(or)End Checklist
+            if(!cto) return;            
+            const view = new DataView(new ArrayBuffer(2));
+            view.setUint8(0,checklist);            
+            await cto.writeValueWithoutResponse(view);            
+        }
+        async function updateChecklist(){
+            if(!cs1s) return;
+            if(!ctc) return;
+            if(!checklist) return;
+            let encoder = new TextEncoder('utf-8');
+            const s1sBuffer = new ArrayBuffer(20);
+            const s1sView = new DataView(s1sBuffer);
+            if(document.getElementById("clist").value == "1")
+            {                
+                s1sView.setFloat32(0, 0.0, true); // Max temperature
+                s1sView.setFloat32(4, 0.0, true); // Min temperature
+                cs1s.writeValueWithoutResponse(s1sView);                
+                document.getElementById("iname").innerHTML = "Nill";
+                document.getElementById("mint").innerHTML = "Nill";
+                document.getElementById("maxt").innerHTML = "Nill";
+                document.getElementById("cstatus").innerHTML = "Nill";
+            }
+            else{
+                s1sView.setFloat32(0, items[itemIndex][1], true); // Max temperature
+                s1sView.setFloat32(4, items[itemIndex][2], true); // Min temperature
+                cs1s.writeValueWithoutResponse(s1sView);
+                // console.log(encoder.encode(items[itemIndex][0]));
+                ctc.writeValueWithoutResponse(encoder.encode(items[itemIndex][0]));
+                document.getElementById("iname").innerHTML = items[itemIndex][0];
+                document.getElementById("mint").innerHTML = items[itemIndex][2];
+                document.getElementById("maxt").innerHTML = items[itemIndex][1];
+            }
+        }
+    </script>
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    -->
+  </body>
+</html>
