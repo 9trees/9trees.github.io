@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ETI BLE Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+      <!-- Content here -->
+      <div>
+          <p class="fs-1 text-center">ETI BLE WebTest Application <a href ="#" class="fs-6">Developed by Research and Development</a></p>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="btnSwitch">
+            <label class="form-check-label" for="btnSwitch">Dark/Light</label>
+            <button id="scan_btn" class="btn btn-primary btn-sm" type="button" onclick="scan_btn()">Scan</button>
+            <button id="dbtn" class="btn btn-danger btn-sm" type="button" onclick="dbtn()">Disconnect</button>        
+          </div>
+        </div>
+        <div class="col display-6">
+          <strong>Battery</strong>: <a href="#" id="bat">Nil</a>
+        </div>
+      </div>
+      <p class="fs-6">Connected To: <a id="AdvName" href ="#" class="fs-6">Nill</a></p>
+      <hr>
+
+      <div class="row">
+        <div class="col">
+          <p id="dis_data"></p>
+        </div>
+        <div class="col">
+          Temperature
+          <div class="row">
+            <div class="col">
+              <div class="display-1" id="s1d_display">0.0</div>
+              <div id="s1d_full">0.000000</div>
+            </div>
+            <div class="col">
+              <div class="display-1" id="units">°x</div>
+            </div>
+          </div>          
+        </div>
+        <div class="col">
+          Command and Notification
+          <div id="notification" class="display-6">Notification</div>
+          <p id="ntimestamp" class="lead">Last Notification: </p>
+          <div>
+            <select name="Command" onchange="CommandWrite(this.value)">
+              <option value="0010">Measure</option>
+              <option value="0020">Ideltify</option>
+              <option value="0030">Restore Default</option>
+              <option value="0040">Factory Default</option>
+              <option value="2000">Cal Lo</option>
+              <option value="3000">Cal Hi</option>
+              <option value="4000">ReqConfigOk</option>
+              <option value="00FE">Shutdown</option>              
+            </select>
+          </div>
+        </div>
+      </div>      
+      <hr> 
+      <div class="row">
+        <div class="col"><button class="btn btn-primary btn-sm" type="button" onclick="RunEDFontTest()">RunEDFontTest</button></div>
+        <div class="col">
+          <input type="file" id="fileInput" onchange="handleFile()" accept=".csv" />
+          <button class="btn btn-primary btn-sm" onclick="startHACCP()">Start HACCP</button><br><span><p id="listLength"></p></span>                
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <select name="EDTest" onchange="Q42023Bug01(this.value)">
+            <option value="dis">ED Disable</option>
+            <option value="low">Only Low Limit</option>
+            <option value="hig">Only High Limit</option>
+            <option value="rng">Range Limit</option>
+            <option value="pln">Plain Text</option>
+          </select> 
+        </div>
+        <div class="col">
+          <div>ED Text: <p id="edtext">EDMyText</p></div>
+          <div>ED Hi: <p id="edhi">HiLimit</p></div>
+          <div>ED Lo: <p id="edlo">LoLimit</p></div>
+        </div>
+        <div class="col">
+          <div class="display-1" id="pfstatus"></div>
+        </div>
+      </div>
+      <hr>
+      <table class="table" id="dataTable" border="1">
+        <tr>
+          <th>EDText</th>
+          <th>EDHi</th>
+          <th>HDLo</th>
+          <th>PFStatus</th>
+          <th>Measured</th>
+        </tr>
+      </table>
+      
+
+      <!-- <div id="w_msg" class="display-6">Nill</div>
+      <div id="w_msg1" class="display-6">Nill</div> -->
+    </div>
+    <script src="js/eti_loc.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+  </body>
+</html>

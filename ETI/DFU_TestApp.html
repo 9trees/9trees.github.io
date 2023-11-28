@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>DFU Test App</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+      </head>
+      <body>
+        <div class="container">
+            <div>
+                <p class="fs-1 text-center">ETI BLE WebTest Application <a href ="#" class="fs-6">Developed by Research and Development</a></p>
+            </div>
+            <audio id="audio" src="js/beep-6.mp3" autostart="false" ></audio>
+            <hr>
+            <!--2 input files of type .txt with title DFU file 1 and DFu file 2-->
+            <p id = "df1">DFU File 1-> </p><input type="file" id="dfu_file_1" accept=".txt" placeholder="Enter DFU file 1"><br>
+            <!-- <br><p id = "df2">DFU File 2-> </p><input type="file" id="dfu_file_2" accept=".txt" placeholder="Enter DFU file 2"> -->
+            <br>
+            <!-- Test box for DFU device serial number -->
+            <input type="text" id="dfu_device_serial_number" placeholder="DFU device serial number">
+            <!--Text box for No of DFU Attempts-->
+            <!-- <input type="text" id="dfu_attempts" placeholder="No.of DFU Attempts"> -->
+            <button id="dfu_btn" class="btn btn-primary btn-sm" type="button" onclick="dfu_btn()">Start DFU</button>
+            <button id="stop_dfu_btn" class="btn btn-danger btn-sm" type="button" onclick="stop_dfu_btn()">Stop DFU</button>
+            <!--Clear button to clean the log's-->
+            <button id="clear_btn" class="btn btn-warning btn-sm" type="button" onclick="clear_btn()">Clear</button>
+            <br>
+            <hr>
+            <p>DFU Staus: <a id="msp_dfu_status" >N/A</a>.</p>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <hr>
+            <div>
+                <pre id="log"></pre>
+            </div>
+
+        </div>
+        <script src="js/dfu_test.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+      </body>
+</html>
