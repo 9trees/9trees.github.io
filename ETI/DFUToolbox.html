@@ -46,7 +46,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 </body>
 <script>
-    var master_dfu_data = '@4000\r\n00 00\r\n';
+    var master_dfu_data = '';
     var bootSAdd = [];
     var bootSData = [];
     var appSAdd = [];
@@ -132,7 +132,7 @@
         
         // Convert the text to BLOB.
         const textToBLOB = new Blob([master_dfu_data], { type: 'text/plain' });
-        const sFileName = 'MasterDFU_'+ mydate +'.txt';	   // The file to save the data.
+        const sFileName = 'Master_MSP_'+ mydate +'.txt';	   // The file to save the data.
         document.getElementById("msg").innerHTML = sFileName + " file has been downloaded and avilable in Download location.";
         let newLink = document.createElement("a");
         newLink.download = sFileName;
